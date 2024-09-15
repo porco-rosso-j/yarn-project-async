@@ -1,0 +1,24 @@
+{
+  "extends": "..",
+  "compilerOptions": {
+    "outDir": "dest",
+    "rootDir": "src",
+    "tsBuildInfoFile": ".tsbuildinfo"
+  },
+  "references": [
+    {
+      "path": "../circuit-types"
+    },
+    {
+      "path": "../circuits.js"
+    },
+    {
+      "path": "../foundation"
+    },
+    {
+      "path": "../types"
+    }
+  ],
+  "include": ["src", "src/**/*.json"],
+  "exclude": ["**/*.test.ts"]
+}

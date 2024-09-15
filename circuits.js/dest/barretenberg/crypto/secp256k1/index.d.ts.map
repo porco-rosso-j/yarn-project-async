@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../../src/barretenberg/crypto/secp256k1/index.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,qBAAa,SAAS;IAEpB,MAAM,CAAC,SAAS,SAKb;IAEH;;;OAGG;IACI,SAAS,IAAI,MAAM;IAI1B;;;;;OAKG;IACI,GAAG,CAAC,KAAK,EAAE,UAAU,EAAE,MAAM,EAAE,UAAU;IAMhD;;;OAGG;IACI,WAAW;IAIlB;;;;OAIG;IACI,mBAAmB,CAAC,UAAU,EAAE,MAAM;CAI9C"}

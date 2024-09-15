@@ -1,0 +1,1 @@
+{"version":3,"file":"get_gas_limits.d.ts","sourceRoot":"","sources":["../../src/contract/get_gas_limits.ts"],"names":[],"mappings":"AAAA,OAAO,EAAoB,KAAK,WAAW,EAAE,MAAM,sBAAsB,CAAC;AAC1E,OAAO,EAAE,GAAG,EAAE,MAAM,oBAAoB,CAAC;AAEzC;;;;GAIG;AACH,wBAAgB,YAAY,CAAC,WAAW,EAAE,WAAW,EAAE,2BAA2B,EAAE,GAAG,EAAE,GAAG,SAAM;;;EAgBjG"}

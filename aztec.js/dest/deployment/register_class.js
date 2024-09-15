@@ -1,0 +1,12 @@
+import { MAX_PACKED_PUBLIC_BYTECODE_SIZE_IN_FIELDS, getContractClassFromArtifact } from '@aztec/circuits.js';
+import { bufferAsFields } from '@aztec/foundation/abi';
+import { getRegistererContract } from './protocol_contracts.js';
+/** Sets up a call to register a contract class given its artifact. */
+export async function registerContractClass(wallet, artifact) {
+    const { artifactHash, privateFunctionsRoot, publicBytecodeCommitment, packedBytecode } = await getContractClassFromArtifact(artifact);
+    const encodedBytecode = bufferAsFields(packedBytecode, MAX_PACKED_PUBLIC_BYTECODE_SIZE_IN_FIELDS);
+    const registerer = getRegistererContract(wallet);
+    await wallet.addCapsule(encodedBytecode);
+    return registerer.methods.register(artifactHash, privateFunctionsRoot, publicBytecodeCommitment);
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicmVnaXN0ZXJfY2xhc3MuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvZGVwbG95bWVudC9yZWdpc3Rlcl9jbGFzcy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUseUNBQXlDLEVBQUUsNEJBQTRCLEVBQUUsTUFBTSxvQkFBb0IsQ0FBQztBQUM3RyxPQUFPLEVBQXlCLGNBQWMsRUFBRSxNQUFNLHVCQUF1QixDQUFDO0FBSTlFLE9BQU8sRUFBRSxxQkFBcUIsRUFBRSxNQUFNLHlCQUF5QixDQUFDO0FBRWhFLHNFQUFzRTtBQUN0RSxNQUFNLENBQUMsS0FBSyxVQUFVLHFCQUFxQixDQUN6QyxNQUFjLEVBQ2QsUUFBMEI7SUFFMUIsTUFBTSxFQUFFLFlBQVksRUFBRSxvQkFBb0IsRUFBRSx3QkFBd0IsRUFBRSxjQUFjLEVBQUUsR0FDcEYsTUFBTSw0QkFBNEIsQ0FBQyxRQUFRLENBQUMsQ0FBQztJQUMvQyxNQUFNLGVBQWUsR0FBRyxjQUFjLENBQUMsY0FBYyxFQUFFLHlDQUF5QyxDQUFDLENBQUM7SUFDbEcsTUFBTSxVQUFVLEdBQUcscUJBQXFCLENBQUMsTUFBTSxDQUFDLENBQUM7SUFDakQsTUFBTSxNQUFNLENBQUMsVUFBVSxDQUFDLGVBQWUsQ0FBQyxDQUFDO0lBQ3pDLE9BQU8sVUFBVSxDQUFDLE9BQU8sQ0FBQyxRQUFRLENBQUMsWUFBWSxFQUFFLG9CQUFvQixFQUFFLHdCQUF3QixDQUFDLENBQUM7QUFDbkcsQ0FBQyJ9

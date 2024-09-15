@@ -1,0 +1,325 @@
+import { inspect } from 'util';
+import { toBigIntBE, toBufferBE } from '../bigint-buffer/index.js';
+import { randomBytes } from '../crypto/random/index.js';
+import { BufferReader } from '../serialize/buffer_reader.js';
+import { TypeRegistry } from '../serialize/type_registry.js';
+const ZERO_BUFFER = Buffer.alloc(32);
+/**
+ * Base field class.
+ * Conversions from Buffer to BigInt and vice-versa are not cheap.
+ * We allow construction with either form and lazily convert to other as needed.
+ * We only check we are within the field modulus when initializing with bigint.
+ */
+class BaseField {
+    /**
+     * Return bigint representation.
+     * @deprecated Just to get things compiling. Use toBigInt().
+     * */
+    get value() {
+        return this.toBigInt();
+    }
+    /** Returns the size in bytes. */
+    get size() {
+        return BaseField.SIZE_IN_BYTES;
+    }
+    constructor(value) {
+        if (value instanceof Buffer) {
+            if (value.length > BaseField.SIZE_IN_BYTES) {
+                throw new Error(`Value length ${value.length} exceeds ${BaseField.SIZE_IN_BYTES}`);
+            }
+            this.asBuffer =
+                value.length === BaseField.SIZE_IN_BYTES
+                    ? value
+                    : Buffer.concat([Buffer.alloc(BaseField.SIZE_IN_BYTES - value.length), value]);
+        }
+        else if (typeof value === 'bigint' || typeof value === 'number' || typeof value === 'boolean') {
+            this.asBigInt = BigInt(value);
+            if (this.asBigInt >= this.modulus()) {
+                throw new Error(`Value 0x${this.asBigInt.toString(16)} is greater or equal to field modulus.`);
+            }
+        }
+        else if (value instanceof BaseField) {
+            this.asBuffer = value.asBuffer;
+            this.asBigInt = value.asBigInt;
+        }
+        else {
+            throw new Error(`Type '${typeof value}' with value '${value}' passed to BaseField ctor.`);
+        }
+    }
+    /**
+     * We return a copy of the Buffer to ensure this remains immutable.
+     */
+    toBuffer() {
+        if (!this.asBuffer) {
+            this.asBuffer = toBufferBE(this.asBigInt, 32);
+        }
+        return Buffer.from(this.asBuffer);
+    }
+    toString() {
+        return `0x${this.toBuffer().toString('hex')}`;
+    }
+    toBigInt() {
+        if (this.asBigInt === undefined) {
+            this.asBigInt = toBigIntBE(this.asBuffer);
+            if (this.asBigInt >= this.modulus()) {
+                throw new Error(`Value 0x${this.asBigInt.toString(16)} is greater or equal to field modulus.`);
+            }
+        }
+        return this.asBigInt;
+    }
+    toBool() {
+        return Boolean(this.toBigInt());
+    }
+    toNumber() {
+        const value = this.toBigInt();
+        if (value > Number.MAX_SAFE_INTEGER) {
+            throw new Error(`Value ${value.toString(16)} greater than than max safe integer`);
+        }
+        return Number(value);
+    }
+    toShortString() {
+        const str = this.toString();
+        return `${str.slice(0, 10)}...${str.slice(-4)}`;
+    }
+    equals(rhs) {
+        return this.toBuffer().equals(rhs.toBuffer());
+    }
+    lt(rhs) {
+        return this.toBigInt() < rhs.toBigInt();
+    }
+    cmp(rhs) {
+        const lhsBigInt = this.toBigInt();
+        const rhsBigInt = rhs.toBigInt();
+        return lhsBigInt === rhsBigInt ? 0 : lhsBigInt < rhsBigInt ? -1 : 1;
+    }
+    isZero() {
+        return this.toBuffer().equals(ZERO_BUFFER);
+    }
+    isEmpty() {
+        return this.isZero();
+    }
+    toFriendlyJSON() {
+        return this.toString();
+    }
+    toField() {
+        return this;
+    }
+}
+BaseField.SIZE_IN_BYTES = 32;
+/**
+ * Constructs a field from a Buffer of BufferReader.
+ * It maybe not read the full 32 bytes if the Buffer is shorter, but it will padded in BaseField constructor.
+ */
+export function fromBuffer(buffer, f) {
+    const reader = BufferReader.asReader(buffer);
+    return new f(reader.readBytes(BaseField.SIZE_IN_BYTES));
+}
+/**
+ * Constructs a field from a Buffer, but reduces it first.
+ * This requires a conversion to a bigint first so the initial underlying representation will be a bigint.
+ */
+function fromBufferReduce(buffer, f) {
+    return new f(toBigIntBE(buffer) % f.MODULUS);
+}
+/**
+ * To ensure a field is uniformly random, it's important to reduce a 512 bit value.
+ * If you reduced a 256 bit number, there would a be a high skew in the lower range of the field.
+ */
+function random(f) {
+    return fromBufferReduce(randomBytes(64), f);
+}
+/**
+ * Constructs a field from a 0x prefixed hex string.
+ */
+function fromHexString(buf, f) {
+    const withoutPrefix = buf.replace(/^0x/i, '');
+    const checked = withoutPrefix.match(/^[0-9A-F]+$/i)?.[0];
+    if (checked === undefined) {
+        throw new Error(`Invalid hex-encoded string: "${buf}"`);
+    }
+    const buffer = Buffer.from(checked.length % 2 === 1 ? '0' + checked : checked, 'hex');
+    return new f(buffer);
+}
+/**
+ * Fr field class.
+ */
+export class Fr extends BaseField {
+    constructor(value) {
+        super(value);
+    }
+    [inspect.custom]() {
+        return `Fr<${this.toString()}>`;
+    }
+    modulus() {
+        return Fr.MODULUS;
+    }
+    static random() {
+        return random(Fr);
+    }
+    static zero() {
+        return Fr.ZERO;
+    }
+    static isZero(value) {
+        return value.isZero();
+    }
+    static fromBuffer(buffer) {
+        return fromBuffer(buffer, Fr);
+    }
+    static fromBufferReduce(buffer) {
+        return fromBufferReduce(buffer, Fr);
+    }
+    /**
+     * Creates a Fr instance from a hex string.
+     * @param buf - a hex encoded string.
+     * @returns the Fr instance
+     */
+    static fromString(buf) {
+        return fromHexString(buf, Fr);
+    }
+    /** Arithmetic */
+    add(rhs) {
+        return new Fr((this.toBigInt() + rhs.toBigInt()) % Fr.MODULUS);
+    }
+    square() {
+        return new Fr((this.toBigInt() * this.toBigInt()) % Fr.MODULUS);
+    }
+    negate() {
+        return new Fr(Fr.MODULUS - this.toBigInt());
+    }
+    sub(rhs) {
+        const result = this.toBigInt() - rhs.toBigInt();
+        return new Fr(result < 0 ? result + Fr.MODULUS : result);
+    }
+    mul(rhs) {
+        return new Fr((this.toBigInt() * rhs.toBigInt()) % Fr.MODULUS);
+    }
+    div(rhs) {
+        if (rhs.isZero()) {
+            throw new Error('Division by zero');
+        }
+        const bInv = modInverse(rhs.toBigInt());
+        return this.mul(bInv);
+    }
+    // Integer division.
+    ediv(rhs) {
+        if (rhs.isZero()) {
+            throw new Error('Division by zero');
+        }
+        return new Fr(this.toBigInt() / rhs.toBigInt());
+    }
+    toJSON() {
+        return {
+            type: 'Fr',
+            value: this.toString(),
+        };
+    }
+}
+Fr.ZERO = new Fr(0n);
+Fr.ONE = new Fr(1n);
+Fr.MODULUS = 0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001n;
+// For deserializing JSON.
+TypeRegistry.register('Fr', Fr);
+/**
+ * Fq field class.
+ */
+export class Fq extends BaseField {
+    [inspect.custom]() {
+        return `Fq<${this.toString()}>`;
+    }
+    get lo() {
+        return new Fr(this.toBigInt() & Fq.LOW_MASK);
+    }
+    get hi() {
+        return new Fr(this.toBigInt() >> Fq.HIGH_SHIFT);
+    }
+    constructor(value) {
+        super(value);
+    }
+    modulus() {
+        return Fq.MODULUS;
+    }
+    static random() {
+        return random(Fq);
+    }
+    static zero() {
+        return Fq.ZERO;
+    }
+    static fromBuffer(buffer) {
+        return fromBuffer(buffer, Fq);
+    }
+    static fromBufferReduce(buffer) {
+        return fromBufferReduce(buffer, Fq);
+    }
+    /**
+     * Creates a Fq instance from a hex string.
+     * @param buf - a hex encoded string.
+     * @returns the Fq instance
+     */
+    static fromString(buf) {
+        return fromHexString(buf, Fq);
+    }
+    static fromHighLow(high, low) {
+        return new Fq((high.toBigInt() << Fq.HIGH_SHIFT) + low.toBigInt());
+    }
+    toJSON() {
+        return {
+            type: 'Fq',
+            value: this.toString(),
+        };
+    }
+}
+Fq.ZERO = new Fq(0n);
+Fq.MODULUS = 0x30644e72e131a029b85045b68181585d97816a916871ca8d3c208c16d87cfd47n;
+Fq.HIGH_SHIFT = BigInt((BaseField.SIZE_IN_BYTES / 2) * 8);
+Fq.LOW_MASK = (1n << Fq.HIGH_SHIFT) - 1n;
+// For deserializing JSON.
+TypeRegistry.register('Fq', Fq);
+// Beware: Performance bottleneck below
+/**
+ * Find the modular inverse of a given element, for BN254 Fr.
+ */
+function modInverse(b) {
+    const [gcd, x, _] = extendedEuclidean(b, Fr.MODULUS);
+    if (gcd != 1n) {
+        throw Error('Inverse does not exist');
+    }
+    // Add modulus if -ve to ensure positive
+    return new Fr(x > 0 ? x : x + Fr.MODULUS);
+}
+/**
+ * The extended Euclidean algorithm can be used to find the multiplicative inverse of a field element
+ * This is used to perform field division.
+ */
+function extendedEuclidean(a, modulus) {
+    if (a == 0n) {
+        return [modulus, 0n, 1n];
+    }
+    else {
+        const [gcd, x, y] = extendedEuclidean(modulus % a, a);
+        return [gcd, y - (modulus / a) * x, x];
+    }
+}
+export const GrumpkinScalar = Fq;
+/** Wraps a function that returns a buffer so that all results are reduced into a field of the given type. */
+export function reduceFn(fn, field) {
+    return (input) => fromBufferReduce(fn(input), field);
+}
+/** If we are in test mode, we register a special equality for fields. */
+if (process.env.NODE_ENV === 'test') {
+    const areFieldsEqual = (a, b) => {
+        const isAField = a instanceof BaseField;
+        const isBField = b instanceof BaseField;
+        if (isAField && isBField) {
+            return a.equals(b);
+        }
+        else if (isAField === isBField) {
+            return undefined;
+        }
+        else {
+            return false;
+        }
+    };
+    // `addEqualityTesters` doesn't seem to be in the types yet.
+    expect.addEqualityTesters([areFieldsEqual]);
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZmllbGRzLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL2ZpZWxkcy9maWVsZHMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUEsT0FBTyxFQUFFLE9BQU8sRUFBRSxNQUFNLE1BQU0sQ0FBQztBQUUvQixPQUFPLEVBQUUsVUFBVSxFQUFFLFVBQVUsRUFBRSxNQUFNLDJCQUEyQixDQUFDO0FBQ25FLE9BQU8sRUFBRSxXQUFXLEVBQUUsTUFBTSwyQkFBMkIsQ0FBQztBQUN4RCxPQUFPLEVBQUUsWUFBWSxFQUFFLE1BQU0sK0JBQStCLENBQUM7QUFDN0QsT0FBTyxFQUFFLFlBQVksRUFBRSxNQUFNLCtCQUErQixDQUFDO0FBRTdELE1BQU0sV0FBVyxHQUFHLE1BQU0sQ0FBQyxLQUFLLENBQUMsRUFBRSxDQUFDLENBQUM7QUFlckM7Ozs7O0dBS0c7QUFDSCxNQUFlLFNBQVM7SUFLdEI7OztTQUdLO0lBQ0wsSUFBSSxLQUFLO1FBQ1AsT0FBTyxJQUFJLENBQUMsUUFBUSxFQUFFLENBQUM7SUFDekIsQ0FBQztJQUVELGlDQUFpQztJQUNqQyxJQUFJLElBQUk7UUFDTixPQUFPLFNBQVMsQ0FBQyxhQUFhLENBQUM7SUFDakMsQ0FBQztJQUVELFlBQXNCLEtBQXFEO1FBQ3pFLElBQUksS0FBSyxZQUFZLE1BQU0sRUFBRSxDQUFDO1lBQzVCLElBQUksS0FBSyxDQUFDLE1BQU0sR0FBRyxTQUFTLENBQUMsYUFBYSxFQUFFLENBQUM7Z0JBQzNDLE1BQU0sSUFBSSxLQUFLLENBQUMsZ0JBQWdCLEtBQUssQ0FBQyxNQUFNLFlBQVksU0FBUyxDQUFDLGFBQWEsRUFBRSxDQUFDLENBQUM7WUFDckYsQ0FBQztZQUNELElBQUksQ0FBQyxRQUFRO2dCQUNYLEtBQUssQ0FBQyxNQUFNLEtBQUssU0FBUyxDQUFDLGFBQWE7b0JBQ3RDLENBQUMsQ0FBQyxLQUFLO29CQUNQLENBQUMsQ0FBQyxNQUFNLENBQUMsTUFBTSxDQUFDLENBQUMsTUFBTSxDQUFD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

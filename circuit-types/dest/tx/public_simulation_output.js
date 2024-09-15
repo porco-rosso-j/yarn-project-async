@@ -1,0 +1,50 @@
+import { CombinedAccumulatedData, CombinedConstantData, Fr, Gas } from '@aztec/circuits.js';
+import { mapValues } from '@aztec/foundation/collection';
+import { EncryptedTxL2Logs, UnencryptedTxL2Logs } from '../logs/tx_l2_logs.js';
+/** Return values of simulating complete callstack. */
+export class NestedProcessReturnValues {
+    constructor(values, nested) {
+        this.values = values;
+        this.nested = nested ?? [];
+    }
+    toJSON() {
+        return {
+            values: this.values?.map(fr => fr.toString()),
+            nested: this.nested.map(n => n.toJSON()),
+        };
+    }
+    static fromJSON(json) {
+        return new NestedProcessReturnValues(json.values?.map(Fr.fromString), json.nested?.map((n) => NestedProcessReturnValues.fromJSON(n)));
+    }
+}
+/**
+ * Outputs of processing the public component of a transaction.
+ */
+export class PublicSimulationOutput {
+    constructor(encryptedLogs, unencryptedLogs, revertReason, constants, end, publicReturnValues, gasUsed) {
+        this.encryptedLogs = encryptedLogs;
+        this.unencryptedLogs = unencryptedLogs;
+        this.revertReason = revertReason;
+        this.constants = constants;
+        this.end = end;
+        this.publicReturnValues = publicReturnValues;
+        this.gasUsed = gasUsed;
+    }
+    toJSON() {
+        return {
+            encryptedLogs: this.encryptedLogs.toJSON(),
+            unencryptedLogs: this.unencryptedLogs.toJSON(),
+            revertReason: this.revertReason,
+            constants: this.constants.toBuffer().toString('hex'),
+            end: this.end.toBuffer().toString('hex'),
+            publicReturnValues: this.publicReturnValues.map(returns => returns?.toJSON()),
+            gasUsed: mapValues(this.gasUsed, gas => gas?.toJSON()),
+        };
+    }
+    static fromJSON(json) {
+        return new PublicSimulationOutput(EncryptedTxL2Logs.fromJSON(json.encryptedLogs), UnencryptedTxL2Logs.fromJSON(json.unencryptedLogs), json.revertReason, CombinedConstantData.fromBuffer(Buffer.from(json.constants, 'hex')), CombinedAccumulatedData.fromBuffer(Buffer.from(json.end, 'hex')), Array.isArray(json.publicReturnValues)
+            ? json.publicReturnValues.map((returns) => NestedProcessReturnValues.fromJSON(returns))
+            : [], mapValues(json.gasUsed, gas => (gas ? Gas.fromJSON(gas) : undefined)));
+    }
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicHVibGljX3NpbXVsYXRpb25fb3V0cHV0LmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3R4L3B1YmxpY19zaW11bGF0aW9uX291dHB1dC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsdUJBQXVCLEVBQUUsb0JBQW9CLEVBQUUsRUFBRSxFQUFFLEdBQUcsRUFBRSxNQUFNLG9CQUFvQixDQUFDO0FBQzVGLE9BQU8sRUFBRSxTQUFTLEVBQUUsTUFBTSw4QkFBOEIsQ0FBQztBQUV6RCxPQUFPLEVBQUUsaUJBQWlCLEVBQUUsbUJBQW1CLEVBQUUsTUFBTSx1QkFBdUIsQ0FBQztBQU8vRSxzREFBc0Q7QUFDdEQsTUFBTSxPQUFPLHlCQUF5QjtJQUlwQyxZQUFZLE1BQTJCLEVBQUUsTUFBb0M7UUFDM0UsSUFBSSxDQUFDLE1BQU0sR0FBRyxNQUFNLENBQUM7UUFDckIsSUFBSSxDQUFDLE1BQU0sR0FBRyxNQUFNLElBQUksRUFBRSxDQUFDO0lBQzdCLENBQUM7SUFFRCxNQUFNO1FBQ0osT0FBTztZQUNMLE1BQU0sRUFBRSxJQUFJLENBQUMsTUFBTSxFQUFFLEdBQUcsQ0FBQyxFQUFFLENBQUMsRUFBRSxDQUFDLEVBQUUsQ0FBQyxRQUFRLEVBQUUsQ0FBQztZQUM3QyxNQUFNLEVBQUUsSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxDQUFDLENBQUMsTUFBTSxFQUFFLENBQUM7U0FDekMsQ0FBQztJQUNKLENBQUM7SUFFRCxNQUFNLENBQUMsUUFBUSxDQUFDLElBQVM7UUFDdkIsT0FBTyxJQUFJLHlCQUF5QixDQUNsQyxJQUFJLENBQUMsTUFBTSxFQUFFLEdBQUcsQ0FBQyxFQUFFLENBQUMsVUFBVSxDQUFDLEVBQy9CLElBQUksQ0FBQyxNQUFNLEVBQUUsR0FBRyxDQUFDLENBQUMsQ0FBTSxFQUFFLEVBQUUsQ0FBQyx5QkFBeUIsQ0FBQyxRQUFRLENBQUMsQ0FBQyxDQUFD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

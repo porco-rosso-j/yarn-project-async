@@ -1,0 +1,4 @@
+import { type ScopedNoteHash, type ScopedNullifier, type ScopedReadRequest } from '@aztec/circuits.js';
+import { type Tuple } from '@aztec/foundation/serialize';
+export declare function buildTransientDataHints<NOTE_HASHES_LEN extends number, NULLIFIERS_LEN extends number>(noteHashes: Tuple<ScopedNoteHash, NOTE_HASHES_LEN>, nullifiers: Tuple<ScopedNullifier, NULLIFIERS_LEN>, futureNoteHashReads: ScopedReadRequest[], futureNullifierReads: ScopedReadRequest[], noteHashNullifierCounterMap: Map<number, number>, noteHashesLength?: NOTE_HASHES_LEN, nullifiersLength?: NULLIFIERS_LEN): [Tuple<number, NOTE_HASHES_LEN>, Tuple<number, NULLIFIERS_LEN>];
+//# sourceMappingURL=build_transient_data_hints.d.ts.map
