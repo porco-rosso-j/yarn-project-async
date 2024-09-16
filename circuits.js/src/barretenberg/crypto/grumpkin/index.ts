@@ -1,3 +1,5 @@
+// import { BarretenbergSync } from '@aztec/bb.js';
+import { Barretenberg } from '@aztec/bb.js';
 import { Fr, type GrumpkinScalar, Point } from '@aztec/foundation/fields';
 
 // import { NativeModules } from 'react-native';
@@ -35,20 +37,8 @@ export class Grumpkin {
    * @returns Result of the multiplication.
    */
   public async mul(point: Point, scalar: GrumpkinScalar): Promise<Point> {
-    // return BBSwiftModule.eccGrumpkinMul(point, scalar)
-    //   .then((resultBuffer: any) => {
-    //     console.log('Result:', resultBuffer);
-    //     if (!resultBuffer) {
-    //       throw new Error('eccGrumpkinMul returned null or encountered an error');
-    //     }
-    //     return Point.fromBuffer(Buffer.from(resultBuffer));
-    //   })
-    //   .catch((error: any) => {
-    //     console.error('Error:', error);
-    //   });
-    point;
-    scalar;
-    return await emptyAsyncMethod();
+    const bb = Barretenberg.new();
+    return Point.fromBuffer(await bb.eccGrumpkinMul(point.toBuffer(), scalar.toBuffer()));
   }
 
   /**
@@ -58,20 +48,8 @@ export class Grumpkin {
    * @returns Result of the addition.
    */
   public async add(a: Point, b: Point): Promise<Point> {
-    // return BBSwiftModule.eccGrumpkinAdd(a, b)
-    //   .then((resultBuffer: any) => {
-    //     console.log('Result:', resultBuffer);
-    //     if (!resultBuffer) {
-    //       throw new Error('eccGrumpkinAdd returned null or encountered an error');
-    //     }
-    //     return Point.fromBuffer(Buffer.from(resultBuffer));
-    //   })
-    //   .catch((error: any) => {
-    //     console.error('Error:', error);
-    //   });
-    a;
-    b;
-    return await emptyAsyncMethod();
+    const bb = Barretenberg.new();
+    return Point.fromBuffer(await bb.eccGrumpkinAdd(a.toBuffer(), b.toBuffer()));
   }
 
   /**

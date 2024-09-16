@@ -13,7 +13,7 @@ export async function pedersenCommit(input: Buffer[]) {
     throw new Error('All Pedersen Commit input buffers must be <= 32 bytes.');
   }
   input = input.map(i => (i.length < 32 ? Buffer.concat([Buffer.alloc(32 - i.length, 0), i]) : i));
-  const bb = await Barretenberg.new();
+  const bb = Barretenberg.new();
   const point = await bb.pedersenCommit(input.map(i => new FrBarretenberg(i)));
   // toBuffer returns Uint8Arrays (browser/worker-boundary friendly).
   // TODO: rename toTypedArray()?
@@ -28,7 +28,7 @@ export async function pedersenCommit(input: Buffer[]) {
  */
 export async function pedersenHash(input: Fieldable[], index = 0): Promise<Fr> {
   const inputFields = serializeToFields(input);
-  const bb = await Barretenberg.new();
+  const bb = Barretenberg.new();
   return Fr.fromBuffer(
     Buffer.from(
       (

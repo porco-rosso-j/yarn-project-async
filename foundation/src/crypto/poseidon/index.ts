@@ -10,7 +10,7 @@ import { type Fieldable, serializeToFields } from '../../serialize/serialize.js'
  */
 export async function poseidon2Hash(input: Fieldable[]): Promise<Fr> {
   const inputFields = serializeToFields(input);
-  const bb = await Barretenberg.new();
+  const bb = Barretenberg.new();
   return Fr.fromBuffer(
     Buffer.from(
       (
@@ -31,7 +31,7 @@ export async function poseidon2Permutation(input: Fieldable[]): Promise<Fr[]> {
   const inputFields = serializeToFields(input);
   // We'd like this assertion but it's not possible to use it in the browser.
   // assert(input.length === 4, 'Input state must be of size 4');
-  const bb = await Barretenberg.new();
+  const bb = Barretenberg.new();
   const res = await bb.poseidon2Permutation(inputFields.map(i => new FrBarretenberg(i.toBuffer())));
   // We'd like this assertion but it's not possible to use it in the browser.
   // assert(res.length === 4, 'Output state must be of size 4');
