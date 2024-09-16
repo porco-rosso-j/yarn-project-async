@@ -26,7 +26,7 @@ export class DefaultDappEntrypoint implements EntrypointInterface {
       throw new Error(`Expected exactly 1 function call, got ${calls.length}`);
     }
 
-    const payload = EntrypointPayload.fromFunctionCalls(calls);
+    const payload = await EntrypointPayload.fromFunctionCalls(calls);
 
     const abi = this.getEntrypointAbi();
     const entrypointPackedArgs = await PackedValues.fromValues(encodeArguments(abi, [payload, this.userAddress]));

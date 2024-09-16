@@ -112,15 +112,24 @@ export function createJsonRpcClient<T extends object>(
       method,
       params: params.map(param => convertToJsonObj(classConverter, param)),
     };
+    console.log('body: ', body);
+
     log.debug(format(`JsonRpcClient.request`, method, '<-', params));
     const res = await fetch(host, method, body, useApiEndpoints);
+
+    console.log('res: ', res);
     log.debug(format(`JsonRpcClient.result`, method, '->', res));
     if (res.error) {
       throw res.error;
     }
+
+    console.log('6');
+
     if ([null, undefined, 'null', 'undefined'].includes(res.result)) {
       return;
     }
+
+    console.log('convertFromJsonObj...');
     return convertFromJsonObj(classConverter, res.result);
   };
 
@@ -130,6 +139,14 @@ export function createJsonRpcClient<T extends object>(
     {},
     {
       get: (target, method: string) => {
+        console.log('get called');
+        if (typeof method === 'symbol') {
+          console.log("method == 'symbol");
+          return Reflect.get(target, method); // Handle symbols safely
+        }
+
+        console.log('4');
+
         let rpcMethod = method;
         if (namespaceMethods) {
           rpcMethod = `${namespaceMethods}_${method}`;
@@ -137,6 +154,8 @@ export function createJsonRpcClient<T extends object>(
         if (['then', 'catch'].includes(method)) {
           return Reflect.get(target, method);
         }
+        console.log('5');
+
         return (...params: any[]) => {
           log.debug(format(`JsonRpcClient.constructor`, 'proxy', rpcMethod, '<-', params));
           return request(rpcMethod, params);

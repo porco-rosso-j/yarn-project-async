@@ -62,6 +62,7 @@
     "dependencies": {
         "@aztec/aztec.js": "file:./aztec.js",
         "@aztec/bb.js": "file:../react-native-starter/react-native-bb.js",
-        "@aztec/circuits.js": "file:./circuits.js"
+        "@aztec/circuits.js": "file:./circuits.js",
+        "@aztec/foundation": "file:./foundation"
     }
 }

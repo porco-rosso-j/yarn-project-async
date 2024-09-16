@@ -29,22 +29,18 @@ export async function pedersenCommit(input: Buffer[]) {
 export async function pedersenHash(input: Fieldable[], index = 0): Promise<Fr> {
   const inputFields = serializeToFields(input);
   const bb = Barretenberg.new();
-  return Fr.fromBuffer(
-    Buffer.from(
-      (
-        await bb.pedersenHash(
-          inputFields.map(i => new FrBarretenberg(i.toBuffer())), // TODO(#4189): remove this stupid conversion
-          index,
-        )
-      ).toBuffer(),
-    ),
+  const result = await bb.pedersenHash(
+    inputFields.map(i => new FrBarretenberg(i.toBuffer())), // TODO(#4189): remove this stupid conversion
+    index,
   );
+
+  return Fr.fromBuffer(Buffer.from(result.toBuffer()));
 }
 
 /**
  * Create a pedersen hash from an arbitrary length buffer.
  */
 export async function pedersenHashBuffer(input: Buffer, index = 0) {
-  const bb = await Barretenberg.new();
+  const bb = Barretenberg.new();
   return Buffer.from((await bb.pedersenHashBuffer(input, index)).toBuffer());
 }

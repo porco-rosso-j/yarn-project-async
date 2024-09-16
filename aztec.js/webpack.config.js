@@ -55,6 +55,7 @@ export default {
       // All node specific code, wherever it's located, should be imported as below.
       // Provides a clean and simple way to always strip out the node code for the web build.
       './node/index.js': false,
+      'react-native$': false,
     },
     fallback: {
       crypto: false,

@@ -51,7 +51,7 @@ export class DeployAccountMethod extends DeployMethod {
 
     if (options.fee && this.#feePaymentArtifact) {
       const { address } = await this.getInstance();
-      const emptyAppPayload = EntrypointPayload.fromAppExecution([]);
+      const emptyAppPayload = await EntrypointPayload.fromAppExecution([]);
       const feePayload = await EntrypointPayload.fromFeeOptions(address, options?.fee);
 
       exec.calls.push({

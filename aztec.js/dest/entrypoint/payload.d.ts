@@ -27,7 +27,8 @@ type EncodedFunctionCall = {
 /** Assembles an entrypoint payload */
 export declare abstract class EntrypointPayload {
     #private;
-    protected constructor(functionCalls: FunctionCall[], generatorIndex: number);
+    protected constructor(generatorIndex: number);
+    init(functionCalls: FunctionCall[]): Promise<this>;
     /**
      * The function calls to execute. This uses snake_case naming so that it is compatible with Noir encoding
      * @internal
@@ -59,13 +60,13 @@ export declare abstract class EntrypointPayload {
      * @param functionCalls - The function calls to execute
      * @returns The execution payload
      */
-    static fromFunctionCalls(functionCalls: FunctionCall[]): AppEntrypointPayload;
+    static fromFunctionCalls(functionCalls: FunctionCall[]): Promise<AppEntrypointPayload>;
     /**
      * Creates an execution payload for the app-portion of a transaction from a set of function calls
      * @param functionCalls - The function calls to execute
      * @returns The execution payload
      */
-    static fromAppExecution(functionCalls: FunctionCall[] | Tuple<FunctionCall, 4>): AppEntrypointPayload;
+    static fromAppExecution(functionCalls: FunctionCall[] | Tuple<FunctionCall, 4>): Promise<AppEntrypointPayload>;
     /**
      * Creates an execution payload to pay the fee for a transaction
      * @param sender - The address sending this payload
@@ -81,7 +82,7 @@ declare class AppEntrypointPayload extends EntrypointPayload {
 /** Entrypoint payload for fee payment to be run during setup phase. */
 declare class FeeEntrypointPayload extends EntrypointPayload {
     #private;
-    constructor(functionCalls: FunctionCall[], generatorIndex: number, isFeePayer: boolean);
+    constructor(generatorIndex: number, isFeePayer: boolean);
     toFields(): Fr[];
     /** Whether the sender should be appointed as fee payer. */
     get is_fee_payer(): boolean;

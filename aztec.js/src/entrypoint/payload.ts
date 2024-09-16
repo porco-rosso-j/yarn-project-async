@@ -46,10 +46,33 @@ export abstract class EntrypointPayload {
   #nonce = Fr.random();
   #generatorIndex: number;
 
-  protected constructor(functionCalls: FunctionCall[], generatorIndex: number) {
+  // protected constructor(functionCalls: FunctionCall[], generatorIndex: number) {
+  //   for (const call of functionCalls) {
+  //     // TODO: create init ?
+  //     //this.#packedArguments.push(await PackedValues.fromValues(call.args));
+  //   }
+
+  //   /* eslint-disable camelcase */
+  //   this.#functionCalls = functionCalls.map((call, index) => ({
+  //     args_hash: this.#packedArguments[index].hash,
+  //     function_selector: call.selector.toField(),
+  //     target_address: call.to.toField(),
+  //     is_public: call.type == FunctionType.PUBLIC,
+  //     is_static: call.isStatic,
+  //   }));
+  //   /* eslint-enable camelcase */
+
+  //   this.#generatorIndex = generatorIndex;
+  // }
+
+  protected constructor(generatorIndex: number) {
+    /* eslint-enable camelcase */
+    this.#generatorIndex = generatorIndex;
+  }
+
+  async init(functionCalls: FunctionCall[]) {
     for (const call of functionCalls) {
-      // TODO: create init ?
-      //this.#packedArguments.push(await PackedValues.fromValues(call.args));
+      this.#packedArguments.push(await PackedValues.fromValues(call.args));
     }
 
     /* eslint-disable camelcase */
@@ -60,9 +83,8 @@ export abstract class EntrypointPayload {
       is_public: call.type == FunctionType.PUBLIC,
       is_static: call.isStatic,
     }));
-    /* eslint-enable camelcase */
 
-    this.#generatorIndex = generatorIndex;
+    return this;
   }
 
   /* eslint-disable camelcase */
@@ -120,8 +142,9 @@ export abstract class EntrypointPayload {
    * @param functionCalls - The function calls to execute
    * @returns The execution payload
    */
-  static fromFunctionCalls(functionCalls: FunctionCall[]) {
-    return new AppEntrypointPayload(functionCalls, 0);
+  static async fromFunctionCalls(functionCalls: FunctionCall[]) {
+    const payload = new AppEntrypointPayload(0);
+    return await payload.init(functionCalls);
   }
 
   /**
@@ -129,12 +152,13 @@ export abstract class EntrypointPayload {
    * @param functionCalls - The function calls to execute
    * @returns The execution payload
    */
-  static fromAppExecution(functionCalls: FunctionCall[] | Tuple<FunctionCall, 4>) {
+  static async fromAppExecution(functionCalls: FunctionCall[] | Tuple<FunctionCall, 4>) {
     if (functionCalls.length > APP_MAX_CALLS) {
       throw new Error(`Expected at most ${APP_MAX_CALLS} function calls, got ${functionCalls.length}`);
     }
     const paddedCalls = padArrayEnd(functionCalls, FunctionCall.empty(), APP_MAX_CALLS);
-    return new AppEntrypointPayload(paddedCalls, GeneratorIndex.SIGNATURE_PAYLOAD);
+    const payload = new AppEntrypointPayload(GeneratorIndex.SIGNATURE_PAYLOAD);
+    return await payload.init(paddedCalls);
   }
 
   /**
@@ -148,7 +172,8 @@ export abstract class EntrypointPayload {
     const feePayer = await feeOpts?.paymentMethod.getFeePayer(feeOpts?.gasSettings);
     const isFeePayer = !!feePayer && feePayer.equals(sender);
     const paddedCalls = padArrayEnd(calls, FunctionCall.empty(), FEE_MAX_CALLS);
-    return new FeeEntrypointPayload(paddedCalls, GeneratorIndex.FEE_PAYLOAD, isFeePayer);
+    const payload = new FeeEntrypointPayload(GeneratorIndex.FEE_PAYLOAD, isFeePayer);
+    return await payload.init(paddedCalls);
   }
 }
 
@@ -163,8 +188,8 @@ class AppEntrypointPayload extends EntrypointPayload {
 class FeeEntrypointPayload extends EntrypointPayload {
   #isFeePayer: boolean;
 
-  constructor(functionCalls: FunctionCall[], generatorIndex: number, isFeePayer: boolean) {
-    super(functionCalls, generatorIndex);
+  constructor(generatorIndex: number, isFeePayer: boolean) {
+    super(generatorIndex);
     this.#isFeePayer = isFeePayer;
   }
 
