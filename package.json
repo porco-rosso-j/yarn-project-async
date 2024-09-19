@@ -11,6 +11,9 @@
         "noir-contracts.js",
         "types"
     ],
+    "scripts": {
+        "build": "yarn workspaces foreach run build"
+    },
     "resolutions": {
         "@aztec/accounts": "file:./accounts",
         "@aztec/aztec.js": "file:./aztec.js",
@@ -20,9 +23,15 @@
         "@aztec/noir-contracts.js": "file:./noir-contracts.js",
         "@aztec/foundation": "file:./foundation",
         "@aztec/types": "file:./types",
-        "@aztec/bb.js": "file:../react-native-starter/react-native-bb.js"
+        "@aztec/bb.js": "file:../react-native-bb.js"
     },
     "prettier": "@aztec/foundation/prettier",
+    "dependencies": {
+        "@aztec/aztec.js": "file:./aztec.js",
+        "@aztec/bb.js": "file:../react-native-bb.js",
+        "@aztec/circuits.js": "file:./circuits.js",
+        "@aztec/foundation": "file:./foundation"
+    },
     "devDependencies": {
         "@jest/globals": "^29.5.0",
         "@monorepo-utils/workspaces-to-typescript-project-references": "^2.9.0",
@@ -58,11 +67,5 @@
         "util": "^0.12.5",
         "webpack": "^5.88.2",
         "webpack-cli": "^5.1.4"
-    },
-    "dependencies": {
-        "@aztec/aztec.js": "file:./aztec.js",
-        "@aztec/bb.js": "file:../react-native-starter/react-native-bb.js",
-        "@aztec/circuits.js": "file:./circuits.js",
-        "@aztec/foundation": "file:./foundation"
     }
 }
