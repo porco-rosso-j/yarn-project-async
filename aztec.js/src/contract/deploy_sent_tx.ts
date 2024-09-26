@@ -43,6 +43,7 @@ export class DeploySentTx<TContract extends Contract = Contract> extends SentTx 
    * @returns The deployed contract instance.
    */
   public async deployed(opts?: DeployedWaitOpts): Promise<TContract> {
+    console.log('deployed');
     const receipt = await this.wait(opts);
     this.log.info(`Contract ${this.instance.address.toString()} successfully deployed.`);
     return receipt.contract;
@@ -55,7 +56,20 @@ export class DeploySentTx<TContract extends Contract = Contract> extends SentTx 
    */
   public override async wait(opts?: DeployedWaitOpts): Promise<DeployTxReceipt<TContract>> {
     const receipt = await super.wait(opts);
+    console.log('[wait in DeploySentTx] receipt.txHash: ', receipt.txHash.toString());
     const contract = await this.getContractObject(opts?.wallet);
+    console.log('[wait in DeploySentTx] contract address: ', contract.address.toString());
+    console.log('[wait in DeploySentTx] contract instance address: ', contract.instance.address.toString());
+    console.log('[wait in DeploySentTx] instance contractClassId: ', contract.instance.contractClassId.toString());
+    console.log('[wait in DeploySentTx] instance deployer: ', contract.instance.deployer.toString());
+    console.log('[wait in DeploySentTx] instance publicKeysHash: ', contract.instance.publicKeysHash.toString());
+    console.log(
+      '[wait in DeploySentTx] instance initializationHash: ',
+      contract.instance.initializationHash.toString(),
+    );
+    console.log('[wait in DeploySentTx] instance salt: ', contract.instance.salt.toString());
+    console.log('[wait in DeploySentTx] instance version: ', contract.instance.version.toString());
+
     return { ...receipt, contract };
   }
 

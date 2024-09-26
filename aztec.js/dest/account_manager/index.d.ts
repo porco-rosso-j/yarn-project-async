@@ -87,6 +87,6 @@ export declare class AccountManager {
     /**
      * Returns whether this account contract has a constructor and needs deployment.
      */
-    isDeployable(): boolean;
+    isDeployable(): Promise<boolean>;
 }
 //# sourceMappingURL=index.d.ts.map

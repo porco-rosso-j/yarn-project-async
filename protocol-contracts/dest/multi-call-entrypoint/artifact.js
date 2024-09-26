@@ -1,0 +1,4 @@
+import { loadContractArtifact } from '@aztec/types/abi';
+import MultiCallEntrypoint from '../../artifacts/MultiCallEntrypoint.json' assert { type: 'json' };
+export const MultiCallEntrypointArtifact = loadContractArtifact(MultiCallEntrypoint);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXJ0aWZhY3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvbXVsdGktY2FsbC1lbnRyeXBvaW50L2FydGlmYWN0LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sRUFBRSxvQkFBb0IsRUFBRSxNQUFNLGtCQUFrQixDQUFDO0FBR3hELE9BQU8sbUJBQW1CLE1BQU0sMENBQTBDLENBQUMsU0FBUyxJQUFJLEVBQUUsTUFBTSxFQUFFLENBQUM7QUFFbkcsTUFBTSxDQUFDLE1BQU0sMkJBQTJCLEdBQUcsb0JBQW9CLENBQUMsbUJBQTJDLENBQUMsQ0FBQyJ9

@@ -162,9 +162,13 @@ export class ClassConverter {
    * @returns If it is a registered class.
    */
   isRegisteredClass(obj: any) {
-    const name = obj.prototype.constructor.name;
+    // const name = obj.prototype.constructor.name;
+    // console.log('isRegisteredClass: ', obj);
+    if (!obj || !obj.constructor) return false;
+    const name = obj.constructor.name;
     return this.toName.has(obj) || this.isRegisteredClassName(name);
   }
+
   /**
    * Convert a JSON-like object to a class object.
    * @param jsonObj - An object encoding a class.

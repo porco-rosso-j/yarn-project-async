@@ -5,7 +5,7 @@ import { type ContractClassPublic, type UnconstrainedFunctionMembershipProof, ty
  * @param selector - Selector of the function to create the proof for.
  * @param artifact - Artifact of the contract class where the function is defined.
  */
-export declare function createUnconstrainedFunctionMembershipProof(selector: FunctionSelector, artifact: ContractArtifact): UnconstrainedFunctionMembershipProof;
+export declare function createUnconstrainedFunctionMembershipProof(selector: FunctionSelector, artifact: ContractArtifact): Promise<UnconstrainedFunctionMembershipProof>;
 /**
  * Verifies that an unconstrained function with a membership proof as emitted by the ClassRegisterer contract is valid,
  * as defined in the protocol specs at contract-deployment/classes:

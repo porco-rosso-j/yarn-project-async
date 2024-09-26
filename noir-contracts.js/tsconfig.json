@@ -1,0 +1,16 @@
+{
+  "extends": "..",
+  "compilerOptions": {
+    "outDir": "dest",
+    "rootDir": "src",
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "allowArbitraryExtensions": true
+  },
+  "references": [
+    {
+      "path": "../aztec.js"
+    }
+  ],
+  "include": ["src", "artifacts/*.d.json.ts"],
+  "exclude": ["dest"]
+}

@@ -1,6 +1,6 @@
 import { type EntrypointInterface, type ExecutionRequestInit } from '@aztec/aztec.js/entrypoint';
 import { TxExecutionRequest } from '@aztec/circuit-types';
-import { type AztecAddress } from '@aztec/circuits.js';
+import { AztecAddress } from '@aztec/circuits.js';
 /**
  * Implementation for an entrypoint interface that can execute multiple function calls in a single transaction
  */
@@ -9,6 +9,7 @@ export declare class DefaultMultiCallEntrypoint implements EntrypointInterface {
     private version;
     private address;
     constructor(chainId: number, version: number, address?: AztecAddress);
+    setAddress(): Promise<void>;
     createTxExecutionRequest(executions: ExecutionRequestInit): Promise<TxExecutionRequest>;
     private getEntrypointAbi;
 }

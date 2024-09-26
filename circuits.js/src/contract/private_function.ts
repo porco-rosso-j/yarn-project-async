@@ -17,7 +17,9 @@ export async function computePrivateFunctionsTree(fns: PrivateFunction[]): Promi
 
 /** Returns the Merkle tree root for the set of private functions in a contract. */
 export async function computePrivateFunctionsRoot(fns: PrivateFunction[]): Promise<Fr> {
-  return Fr.fromBuffer((await getPrivateFunctionTreeCalculator()).computeTreeRoot(await computePrivateFunctionLeaves(fns)));
+  return Fr.fromBuffer(
+    await (await getPrivateFunctionTreeCalculator()).computeTreeRoot(await computePrivateFunctionLeaves(fns)),
+  );
 }
 
 async function computePrivateFunctionLeaves(fns: PrivateFunction[]): Promise<Buffer[]> {
@@ -27,13 +29,20 @@ async function computePrivateFunctionLeaves(fns: PrivateFunction[]): Promise<Buf
 
 /** Returns the leaf for a given private function. */
 export async function computePrivateFunctionLeaf(fn: PrivateFunction): Promise<Buffer> {
-  return  (await pedersenHash([fn.selector, fn.vkHash], GeneratorIndex.FUNCTION_LEAF)).toBuffer();
+  return (await pedersenHash([fn.selector, fn.vkHash], GeneratorIndex.FUNCTION_LEAF)).toBuffer();
 }
 
 async function getPrivateFunctionTreeCalculator(): Promise<MerkleTreeCalculator> {
   if (!privateFunctionTreeCalculator) {
+    // const functionTreeZeroLeaf = pedersenHash(new Array(PRIVATE_FUNCTION_SIZE).fill(0)).toBuffer();
+    // privateFunctionTreeCalculator = new MerkleTreeCalculator(FUNCTION_TREE_HEIGHT, functionTreeZeroLeaf);
+    // const functionTreeZeroLeaf = async () => {
+    //   return (await pedersenHash(new Array(PRIVATE_FUNCTION_SIZE).fill(0))).toBuffer();
+    // };
     const functionTreeZeroLeaf = (await pedersenHash(new Array(PRIVATE_FUNCTION_SIZE).fill(0))).toBuffer();
-    privateFunctionTreeCalculator = new MerkleTreeCalculator(FUNCTION_TREE_HEIGHT, functionTreeZeroLeaf);
+
+    privateFunctionTreeCalculator = new MerkleTreeCalculator(FUNCTION_TREE_HEIGHT);
+    await privateFunctionTreeCalculator.setHasher(functionTreeZeroLeaf);
   }
   return privateFunctionTreeCalculator;
 }

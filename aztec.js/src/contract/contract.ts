@@ -22,6 +22,8 @@ export class Contract extends ContractBase {
    * @returns A promise that resolves to a new Contract instance.
    */
   public static async at(address: AztecAddress, artifact: ContractArtifact, wallet: Wallet): Promise<Contract> {
+    console.log('[at in Contract] artifact: ', artifact.name);
+    console.log('[at in Contract] address: ', address.toString());
     const instance = await wallet.getContractInstance(address);
     if (instance === undefined) {
       throw new Error(`Contract instance at ${address.toString()} has not been registered in the wallet's PXE`);
@@ -37,6 +39,8 @@ export class Contract extends ContractBase {
    * @param constructorName - The name of the constructor function to call.
    */
   public static deploy(wallet: Wallet, artifact: ContractArtifact, args: any[], constructorName?: string) {
+    console.log('[deploy in Contract] artifact: ', artifact.name);
+    console.log('[deploy in Contract] wallet address: ', wallet.getAddress().toString());
     const postDeployCtor = (address: AztecAddress, wallet: Wallet) => Contract.at(address, artifact, wallet);
     return new DeployMethod(Fr.ZERO, wallet, artifact, postDeployCtor, args, constructorName);
   }
@@ -56,6 +60,9 @@ export class Contract extends ContractBase {
     args: any[],
     constructorName?: string,
   ) {
+    console.log('[deployWithPublicKeysHash in Contract] artifact: ', artifact.name);
+    console.log('[deployWithPublicKeysHash in Contract] wallet address: ', wallet.getAddress().toString());
+
     const postDeployCtor = (address: AztecAddress, wallet: Wallet) => Contract.at(address, artifact, wallet);
     return new DeployMethod(publicKeysHash, wallet, artifact, postDeployCtor, args, constructorName);
   }

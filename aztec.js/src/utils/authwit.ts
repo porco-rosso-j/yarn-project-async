@@ -56,7 +56,7 @@ export const computeAuthWitMessageHash = async (intent: IntentInnerHash | Intent
 
   if ('caller' in intent) {
     const action = intent.action instanceof ContractFunctionInteraction ? intent.action.request() : intent.action;
-    return computeOuterAuthWitHash(
+    return await computeOuterAuthWitHash(
       action.to.toField(),
       chainId,
       version,
@@ -64,7 +64,7 @@ export const computeAuthWitMessageHash = async (intent: IntentInnerHash | Intent
     );
   } else {
     const inner = Buffer.isBuffer(intent.innerHash) ? Fr.fromBuffer(intent.innerHash) : intent.innerHash;
-    return computeOuterAuthWitHash(intent.consumer, chainId, version, inner);
+    return await computeOuterAuthWitHash(intent.consumer, chainId, version, inner);
   }
 };
 // docs:end:authwit_computeAuthWitMessageHash

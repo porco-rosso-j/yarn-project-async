@@ -130,7 +130,7 @@ export class PublicCallRequest {
    * @returns A CallRequest instance with the contract address, caller context, and the hash of the call stack item.
    */
   async toCallRequest() {
-    const item = this.toPublicCallStackItem();
+    const item = await this.toPublicCallStackItem();
     const callerContext = this.callContext.isDelegateCall
       ? new CallerContext(
           this.parentCallContext.msgSender,
@@ -139,7 +139,7 @@ export class PublicCallRequest {
         )
       : CallerContext.empty();
     return new CallRequest(
-      await (await item).getCompressed().hash(),
+      await item.getCompressed().hash(),
       this.parentCallContext.storageContractAddress,
       callerContext,
       new Fr(this.sideEffectCounter),
@@ -151,8 +151,8 @@ export class PublicCallRequest {
    * Returns the hash of the arguments for this request.
    * @returns Hash of the arguments for this request.
    */
-  getArgsHash() {
-    return computeVarArgsHash(this.args);
+  async getArgsHash() {
+    return await computeVarArgsHash(this.args);
   }
 
   static empty() {

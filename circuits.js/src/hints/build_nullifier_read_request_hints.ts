@@ -119,7 +119,7 @@ export async function buildSiloedNullifierReadRequestHints<PENDING extends numbe
     new Nullifier(n.value, n.counter, n.noteHash).scope(AztecAddress.ZERO),
   ) as Tuple<ScopedNullifier, typeof MAX_NULLIFIERS_PER_TX>;
 
-  return buildNullifierReadRequestHints(
+  return await buildNullifierReadRequestHints(
     oracle,
     siloedReadRequests,
     scopedNullifiers,

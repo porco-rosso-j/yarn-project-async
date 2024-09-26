@@ -75,8 +75,10 @@ export class ContractBase {
     return this.instance.address;
   }
 
+  // todo: not have to be async/await?
   /** Partial address of the contract. */
   public get partialAddress() {
+    console.log('partialAddress called in ContractBase: ', this.instance?.address.toString());
     return computePartialAddress(this.instance);
   }
 

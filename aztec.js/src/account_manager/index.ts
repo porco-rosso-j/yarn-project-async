@@ -53,8 +53,8 @@ export class AccountManager {
    */
   public async getAccount(): Promise<AccountInterface> {
     const nodeInfo = await this.pxe.getNodeInfo();
-    const completeAddress = this.getCompleteAddress();
-    return this.accountContract.getInterface(await completeAddress, nodeInfo);
+    const completeAddress = await this.getCompleteAddress();
+    return this.accountContract.getInterface(completeAddress, nodeInfo);
   }
 
   /**
@@ -112,7 +112,7 @@ export class AccountManager {
     await this.pxe.registerAccount(this.secretKey, (await this.getCompleteAddress()).partialAddress);
 
     await waitForAccountSynch(this.pxe, await this.getCompleteAddress(), opts);
-    return this.getWallet();
+    return await this.getWallet();
   }
 
   /**
@@ -123,7 +123,7 @@ export class AccountManager {
    */
   public async getDeployMethod() {
     if (!this.deployMethod) {
-      if (!this.isDeployable()) {
+      if (!(await this.isDeployable())) {
         throw new Error(
           `Account contract ${this.accountContract.getContractArtifact().name} does not require deployment.`,
         );
@@ -132,7 +132,9 @@ export class AccountManager {
       await this.pxe.registerAccount(this.secretKey, (await this.getCompleteAddress()).partialAddress);
 
       const { chainId, protocolVersion } = await this.pxe.getNodeInfo();
-      const deployWallet = new SignerlessWallet(this.pxe, new DefaultMultiCallEntrypoint(chainId, protocolVersion));
+      const entrypoint = new DefaultMultiCallEntrypoint(chainId, protocolVersion);
+      await entrypoint.setAddress();
+      const deployWallet = new SignerlessWallet(this.pxe, entrypoint);
 
       // We use a signerless wallet with the multi call entrypoint in order to make multiple calls in one go
       // If we used getWallet, the deployment would get routed via the account contract entrypoint
@@ -184,14 +186,14 @@ export class AccountManager {
    * @returns A Wallet instance.
    */
   public async waitSetup(opts: WaitOpts = DefaultWaitOpts): Promise<AccountWalletWithSecretKey> {
-    await (this.isDeployable() ? this.deploy().wait(opts) : this.register());
-    return this.getWallet();
+    (await this.isDeployable()) ? await (await this.deploy()).wait(opts) : await this.register();
+    return await this.getWallet();
   }
 
   /**
    * Returns whether this account contract has a constructor and needs deployment.
    */
-  public isDeployable() {
-    return this.accountContract.getDeploymentArgs() !== undefined;
+  public async isDeployable() {
+    return (await this.accountContract.getDeploymentArgs()) !== undefined;
   }
 }

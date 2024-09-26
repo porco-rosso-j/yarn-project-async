@@ -63,7 +63,7 @@
     "@aztec/circuits.js": "file:../circuits.js",
     "@aztec/ethereum": "0.46.1",
     "@aztec/foundation": "file:../foundation",
-    "@aztec/types": "0.46.1",
+    "@aztec/types": "file:../types",
     "browserify-cipher": "^1.0.1",
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",

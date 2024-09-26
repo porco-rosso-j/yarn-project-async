@@ -1,0 +1,1 @@
+{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../src/key-registry/index.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,YAAY,EAAkC,MAAM,oBAAoB,CAAC;AAElF,OAAO,EAAE,KAAK,gBAAgB,EAAgC,MAAM,yBAAyB,CAAC;AAG9F,mEAAmE;AACnE,wBAAsB,uBAAuB,IAAI,OAAO,CAAC,gBAAgB,CAAC,CASzE;AAED,wBAAsB,8BAA8B,IAAI,OAAO,CAAC,YAAY,CAAC,CAE5E;AAED,eAAO,MAAM,kBAAkB,cAA0D,CAAC"}

@@ -1,4 +1,5 @@
-import { Buffer } from 'buffer';
+// import { Buffer } from 'buffer';
+import { Buffer } from 'buffer/';
 import cloneDeepWith from 'lodash.clonedeepwith';
 
 import { type ClassConverter } from './class_converter.js';
@@ -68,14 +69,24 @@ export function JsonStringify(obj: object, prettify?: boolean): string {
  */
 export function convertFromJsonObj(cc: ClassConverter, obj: any): any {
   if (obj === null) {
+    // console.log('obj === null');
     return undefined; // `null` doesn't work with default args.
   }
 
-  if (!obj) {
-    return obj; // Primitive type
+  if (obj === undefined) {
+    // console.log('obj === undefined');
+    return obj; // Handle undefined explicitly
   }
+
+  // if (!obj) {
+  //   return obj; // Primitive type
+  // }
   // Is this a serialized Node buffer?
-  if (obj.type === 'Buffer' && typeof obj.data === 'string') {
+
+  // console.log('Is this a serialized Node buffer?', obj.type === 'Buffer' && typeof obj.data === 'string');
+  // console.log('obj.data: ', obj.data);
+
+  if (obj && obj.type === 'Buffer' && typeof obj.data === 'string') {
     return Buffer.from(obj.data, 'base64');
   }
 
@@ -130,7 +141,10 @@ export function convertToJsonObj(cc: ClassConverter, obj: any): any {
   }
 
   // Is this a Node buffer?
-  if (obj instanceof Buffer) {
+  // if (obj instanceof Buffer) {
+  //   return { type: 'Buffer', data: obj.toString('base64') };
+  // }
+  if (Buffer.isBuffer(obj)) {
     return { type: 'Buffer', data: obj.toString('base64') };
   }
 

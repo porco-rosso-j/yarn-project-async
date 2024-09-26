@@ -63,7 +63,7 @@
     "@aztec/circuit-types": "file:../circuit-types",
     "@aztec/circuits.js": "file:../circuits.js",
     "@aztec/ethereum": "0.46.1",
-    "@aztec/protocol-contracts": "0.46.1",
+    "@aztec/protocol-contracts": "file../protocol-contracts",
     "tslib": "^2.4.0"
   },
   "devDependencies": {

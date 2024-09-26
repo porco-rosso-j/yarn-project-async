@@ -36,24 +36,24 @@ const sha256Fr = reduceFn(sha256, Fr);
  * ```
  * @param artifact - Artifact to calculate the hash for.
  */
-export function computeArtifactHash(
+export async function computeArtifactHash(
   artifact: ContractArtifact | { privateFunctionRoot: Fr; unconstrainedFunctionRoot: Fr; metadataHash: Fr },
-): Fr {
+): Promise<Fr> {
   if ('privateFunctionRoot' in artifact && 'unconstrainedFunctionRoot' in artifact && 'metadataHash' in artifact) {
     const { privateFunctionRoot, unconstrainedFunctionRoot, metadataHash } = artifact;
     const preimage = [privateFunctionRoot, unconstrainedFunctionRoot, metadataHash].map(x => x.toBuffer());
     return sha256Fr(Buffer.concat([numToUInt8(VERSION), ...preimage]));
   }
 
-  const preimage = computeArtifactHashPreimage(artifact);
-  const artifactHash = computeArtifactHash(computeArtifactHashPreimage(artifact));
+  const preimage = await computeArtifactHashPreimage(artifact);
+  const artifactHash = await computeArtifactHash(await computeArtifactHashPreimage(artifact));
   getLogger().debug('Computed artifact hash', { artifactHash, ...preimage });
   return artifactHash;
 }
 
-export function computeArtifactHashPreimage(artifact: ContractArtifact) {
-  const privateFunctionRoot = computeArtifactFunctionTreeRoot(artifact, FunctionType.PRIVATE);
-  const unconstrainedFunctionRoot = computeArtifactFunctionTreeRoot(artifact, FunctionType.UNCONSTRAINED);
+export async function computeArtifactHashPreimage(artifact: ContractArtifact) {
+  const privateFunctionRoot = await computeArtifactFunctionTreeRoot(artifact, FunctionType.PRIVATE);
+  const unconstrainedFunctionRoot = await computeArtifactFunctionTreeRoot(artifact, FunctionType.UNCONSTRAINED);
   const metadataHash = computeArtifactMetadataHash(artifact);
   return { privateFunctionRoot, unconstrainedFunctionRoot, metadataHash };
 }
@@ -82,19 +82,25 @@ export function computeArtifactMetadataHash(artifact: ContractArtifact) {
   return sha256Fr(Buffer.from(JSON.stringify(metadata), 'utf-8'));
 }
 
-export function computeArtifactFunctionTreeRoot(artifact: ContractArtifact, fnType: FunctionType) {
-  const root = computeArtifactFunctionTree(artifact, fnType)?.root;
+export async function computeArtifactFunctionTreeRoot(artifact: ContractArtifact, fnType: FunctionType) {
+  const root = (await computeArtifactFunctionTree(artifact, fnType))?.root;
   return root ? Fr.fromBuffer(root) : Fr.ZERO;
 }
 
-export function computeArtifactFunctionTree(artifact: ContractArtifact, fnType: FunctionType): MerkleTree | undefined {
+export async function computeArtifactFunctionTree(
+  artifact: ContractArtifact,
+  fnType: FunctionType,
+): Promise<MerkleTree | undefined> {
   const leaves = computeFunctionLeaves(artifact, fnType);
   // TODO(@spalladino) Consider implementing a null-object for empty trees
   if (leaves.length === 0) {
     return undefined;
   }
   const height = Math.ceil(Math.log2(leaves.length));
-  const calculator = new MerkleTreeCalculator(height, Buffer.alloc(32), getArtifactMerkleTreeHasher());
+  // const calculator = new MerkleTreeCalculator(height, Buffer.alloc(32), getArtifactMerkleTreeHasher());
+  const calculator = new MerkleTreeCalculator(height);
+  await calculator.setHasher(Buffer.alloc(32), getArtifactMerkleTreeHasher());
+
   return calculator.computeTree(leaves.map(x => x.toBuffer()));
 }
 
@@ -127,6 +133,12 @@ function getLogger() {
   return createDebugLogger('aztec:circuits:artifact_hash');
 }
 
+// export function getArtifactMerkleTreeHasher() {
+//   return (l: Buffer, r: Buffer) => sha256Fr(Buffer.concat([l, r])).toBuffer();
+// }
+
 export function getArtifactMerkleTreeHasher() {
-  return (l: Buffer, r: Buffer) => sha256Fr(Buffer.concat([l, r])).toBuffer();
+  return async (l: Buffer, r: Buffer) => {
+    return sha256Fr(Buffer.concat([l, r])).toBuffer();
+  };
 }

@@ -8,8 +8,9 @@
         "circuits.js",
         "circuit-types",
         "foundation",
-        "noir-contracts.js",
-        "types"
+        "types",
+        "protocol-contracts",
+        "noir-contracts.js"
     ],
     "scripts": {
         "build": "yarn workspaces foreach run build"
@@ -20,16 +21,18 @@
         "@aztec/circuit-types": "file:./circuit-types",
         "@aztec/circuits.js": "file:./circuits.js",
         "@aztec/entrypoints": "file:./entrypoints",
-        "@aztec/noir-contracts.js": "file:./noir-contracts.js",
         "@aztec/foundation": "file:./foundation",
         "@aztec/types": "file:./types",
-        "@aztec/bb.js": "file:../react-native-bb.js"
+        "@aztec/bb.js": "file:../react-native-bb.js",
+        "@aztec/protocol-contracts": "file:./protocol-contracts"
     },
     "prettier": "@aztec/foundation/prettier",
     "dependencies": {
         "@aztec/aztec.js": "file:./aztec.js",
         "@aztec/bb.js": "file:../react-native-bb.js",
+        "@aztec/circuit-types": "file:./circuit-types",
         "@aztec/circuits.js": "file:./circuits.js",
+        "@aztec/entrypoints": "file:./entrypoints",
         "@aztec/foundation": "file:./foundation"
     },
     "devDependencies": {

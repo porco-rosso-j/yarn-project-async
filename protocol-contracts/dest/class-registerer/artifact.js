@@ -1,0 +1,5 @@
+import { loadContractArtifact } from '@aztec/types/abi';
+// import ContractClassRegistererJson from '../../artifacts/ContractClassRegisterer.json' assert { type: 'json' };
+import ContractClassRegistererJson from '../../artifacts/ContractClassRegisterer.json' assert { type: 'json' };
+export const ContractClassRegistererArtifact = loadContractArtifact(ContractClassRegistererJson);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXJ0aWZhY3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvY2xhc3MtcmVnaXN0ZXJlci9hcnRpZmFjdC50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxPQUFPLEVBQUUsb0JBQW9CLEVBQUUsTUFBTSxrQkFBa0IsQ0FBQztBQUd4RCxrSEFBa0g7QUFDbEgsT0FBTywyQkFBMkIsTUFBTSw4Q0FBOEMsQ0FBQyxTQUFTLElBQUksRUFBRSxNQUFNLEVBQUUsQ0FBQztBQUUvRyxNQUFNLENBQUMsTUFBTSwrQkFBK0IsR0FBRyxvQkFBb0IsQ0FDakUsMkJBQW1ELENBQ3BELENBQUMifQ==

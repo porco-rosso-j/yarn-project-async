@@ -18,10 +18,10 @@ export class PublicKeys {
     public masterTaggingPublicKey: PublicKey,
   ) {}
 
-  hash() {
+  async hash() {
     return this.isEmpty()
       ? Fr.ZERO
-      : poseidon2Hash([
+      : await poseidon2Hash([
           this.masterNullifierPublicKey,
           this.masterIncomingViewingPublicKey,
           this.masterOutgoingViewingPublicKey,

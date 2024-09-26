@@ -6,5 +6,5 @@ import { type Wallet } from '../wallet/index.js';
  * @param wallet - The wallet to use for the deployment.
  * @param instance - The instance to deploy.
  */
-export declare function deployInstance(wallet: Wallet, instance: ContractInstanceWithAddress): ContractFunctionInteraction;
+export declare function deployInstance(wallet: Wallet, instance: ContractInstanceWithAddress): Promise<ContractFunctionInteraction>;
 //# sourceMappingURL=deploy_instance.d.ts.map

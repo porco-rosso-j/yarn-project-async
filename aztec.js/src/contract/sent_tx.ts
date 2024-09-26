@@ -68,6 +68,7 @@ export class SentTx {
    * @returns The transaction receipt.
    */
   public async wait(opts?: WaitOpts): Promise<FieldsOf<TxReceipt>> {
+    console.log('[wait in SentTx]');
     if (opts?.debug && opts.waitForNotesSync === false) {
       throw new Error('Cannot set debug to true if waitForNotesSync is false');
     }
@@ -79,6 +80,7 @@ export class SentTx {
     }
     if (opts?.debug) {
       const txHash = await this.getTxHash();
+      console.log('[wait in SentTx] txHash: ', txHash.toString());
       const tx = (await this.pxe.getTxEffect(txHash))!;
       const visibleIncomingNotes = await this.pxe.getIncomingNotes({ txHash });
       const visibleOutgoingNotes = await this.pxe.getOutgoingNotes({ txHash });
@@ -116,6 +118,7 @@ export class SentTx {
 
   protected async waitForReceipt(opts?: WaitOpts): Promise<TxReceipt> {
     const txHash = await this.getTxHash();
+    console.log('[wait in SentTx] txHash: ', txHash.toString());
     return await retryUntil(
       async () => {
         const txReceipt = await this.pxe.getTxReceipt(txHash);

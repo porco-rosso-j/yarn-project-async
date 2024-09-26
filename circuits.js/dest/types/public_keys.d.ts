@@ -21,7 +21,7 @@ export declare class PublicKeys {
     masterOutgoingViewingPublicKey: PublicKey, 
     /** Master tagging viewing public key */
     masterTaggingPublicKey: PublicKey);
-    hash(): Fr | Promise<Fr>;
+    hash(): Promise<Fr>;
     isEmpty(): boolean;
     static empty(): PublicKeys;
     /**

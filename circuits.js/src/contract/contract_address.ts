@@ -26,7 +26,7 @@ export async function computeContractAddressFromInstance(
 ): Promise<AztecAddress> {
   const partialAddress = await computePartialAddress(instance);
   const publicKeysHash = instance.publicKeysHash;
-  return computeAddress(publicKeysHash, partialAddress);
+  return await computeAddress(publicKeysHash, partialAddress);
 }
 
 /**
@@ -37,7 +37,7 @@ export async function computePartialAddress(
   instance:
     | Pick<ContractInstance, 'contractClassId' | 'initializationHash' | 'salt' | 'deployer'>
     | { contractClassId: Fr; saltedInitializationHash: Fr },
-): Promise  <Fr> {
+): Promise<Fr> {
   const saltedInitializationHash =
     'saltedInitializationHash' in instance
       ? instance.saltedInitializationHash
@@ -52,8 +52,11 @@ export async function computePartialAddress(
  */
 export async function computeSaltedInitializationHash(
   instance: Pick<ContractInstance, 'initializationHash' | 'salt' | 'deployer'>,
-):Promise<Fr> {
-  return await pedersenHash([instance.salt, instance.initializationHash, instance.deployer], GeneratorIndex.PARTIAL_ADDRESS);
+): Promise<Fr> {
+  return await pedersenHash(
+    [instance.salt, instance.initializationHash, instance.deployer],
+    GeneratorIndex.PARTIAL_ADDRESS,
+  );
 }
 
 /**
@@ -63,7 +66,7 @@ export async function computeSaltedInitializationHash(
  * @returns The hash, or zero if no initialization function is provided.
  */
 export async function computeInitializationHash(initFn: FunctionAbi | undefined, args: any[]): Promise<Fr> {
-  if (!initFn) { 
+  if (!initFn) {
     return Fr.ZERO;
   }
   const selector = FunctionSelector.fromNameAndParameters(initFn.name, initFn.parameters);
@@ -77,7 +80,10 @@ export async function computeInitializationHash(initFn: FunctionAbi | undefined,
  * @param args - Encoded arguments.
  * @returns The hash.
  */
-export async function computeInitializationHashFromEncodedArgs(initFn: FunctionSelector, encodedArgs: Fr[]): Promise<Fr> {
+export async function computeInitializationHashFromEncodedArgs(
+  initFn: FunctionSelector,
+  encodedArgs: Fr[],
+): Promise<Fr> {
   const argsHash = await computeVarArgsHash(encodedArgs);
   return await pedersenHash([initFn, argsHash], GeneratorIndex.CONSTRUCTOR);
 }

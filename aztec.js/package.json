@@ -77,8 +77,8 @@
     "@aztec/circuits.js": "file:../circuits.js",
     "@aztec/ethereum": "0.46.1",
     "@aztec/foundation": "file:../foundation",
-    "@aztec/protocol-contracts": "0.46.1",
-    "@aztec/types": "0.46.1",
+    "@aztec/protocol-contracts": "file:../protocol-contracts",
+    "@aztec/types": "file:../types",
     "tslib": "^2.4.0"
   },
   "devDependencies": {

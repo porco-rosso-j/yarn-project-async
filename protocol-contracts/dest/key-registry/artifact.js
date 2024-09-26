@@ -1,0 +1,4 @@
+import { loadContractArtifact } from '@aztec/types/abi';
+import KeyRegistryJson from '../../artifacts/KeyRegistry.json' assert { type: 'json' };
+export const KeyRegistryArtifact = loadContractArtifact(KeyRegistryJson);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiYXJ0aWZhY3QuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMva2V5LXJlZ2lzdHJ5L2FydGlmYWN0LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBLE9BQU8sRUFBRSxvQkFBb0IsRUFBRSxNQUFNLGtCQUFrQixDQUFDO0FBR3hELE9BQU8sZUFBZSxNQUFNLGtDQUFrQyxDQUFDLFNBQVMsSUFBSSxFQUFFLE1BQU0sRUFBRSxDQUFDO0FBRXZGLE1BQU0sQ0FBQyxNQUFNLG1CQUFtQixHQUFHLG9CQUFvQixDQUFDLGVBQXVDLENBQUMsQ0FBQyJ9

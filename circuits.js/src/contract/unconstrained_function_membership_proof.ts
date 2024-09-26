@@ -22,10 +22,10 @@ import {
  * @param selector - Selector of the function to create the proof for.
  * @param artifact - Artifact of the contract class where the function is defined.
  */
-export function createUnconstrainedFunctionMembershipProof(
+export async function createUnconstrainedFunctionMembershipProof(
   selector: FunctionSelector,
   artifact: ContractArtifact,
-): UnconstrainedFunctionMembershipProof {
+): Promise<UnconstrainedFunctionMembershipProof> {
   const log = createDebugLogger('aztec:circuits:function_membership_proof');
 
   // Locate function artifact
@@ -38,12 +38,12 @@ export function createUnconstrainedFunctionMembershipProof(
 
   // Compute preimage for the artifact hash
   const { privateFunctionRoot: privateFunctionsArtifactTreeRoot, metadataHash: artifactMetadataHash } =
-    computeArtifactHashPreimage(artifact);
+    await computeArtifactHashPreimage(artifact);
 
   // Compute the sibling path for the "artifact tree"
   const functionMetadataHash = computeFunctionMetadataHash(fn);
   const functionArtifactHash = computeFunctionArtifactHash({ ...fn, functionMetadataHash });
-  const artifactTree = computeArtifactFunctionTree(artifact, FunctionType.UNCONSTRAINED)!;
+  const artifactTree = (await computeArtifactFunctionTree(artifact, FunctionType.UNCONSTRAINED))!;
   const artifactTreeLeafIndex = artifactTree.getIndex(functionArtifactHash.toBuffer());
   const artifactTreeSiblingPath = artifactTree.getSiblingPath(artifactTreeLeafIndex).map(Fr.fromBuffer);
 
@@ -96,7 +96,7 @@ export async function isValidUnconstrainedFunctionMembershipProof(
       getArtifactMerkleTreeHasher(),
     ),
   );
-  const computedArtifactHash = computeArtifactHash({
+  const computedArtifactHash = await computeArtifactHash({
     privateFunctionRoot: fn.privateFunctionsArtifactTreeRoot,
     unconstrainedFunctionRoot: computedArtifactFunctionTreeRoot,
     metadataHash: fn.artifactMetadataHash,

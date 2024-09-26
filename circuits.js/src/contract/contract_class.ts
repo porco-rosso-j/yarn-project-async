@@ -16,7 +16,7 @@ const cmpFunctionArtifacts = <T extends { selector: FunctionSelector }>(a: T, b:
 export async function getContractClassFromArtifact(
   artifact: ContractArtifact | ContractArtifactWithHash,
 ): Promise<ContractClassWithId & ContractClassIdPreimage> {
-  const artifactHash = 'artifactHash' in artifact ? artifact.artifactHash : computeArtifactHash(artifact);
+  const artifactHash = 'artifactHash' in artifact ? artifact.artifactHash : await computeArtifactHash(artifact);
   const publicFunctions: ContractClass['publicFunctions'] = artifact.functions
     .filter(f => f.functionType === FunctionType.PUBLIC)
     .map(f => ({

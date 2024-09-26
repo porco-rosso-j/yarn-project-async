@@ -75,7 +75,7 @@
     "@aztec/entrypoints": "file:../entrypoints",
     "@aztec/ethereum": "0.46.1",
     "@aztec/foundation": "file:../foundation",
-    "@aztec/types": "0.46.1",
+    "@aztec/types": "file:../types",
     "tslib": "^2.4.0"
   },
   "devDependencies": {

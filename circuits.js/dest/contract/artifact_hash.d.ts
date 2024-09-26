@@ -27,19 +27,19 @@ export declare function computeArtifactHash(artifact: ContractArtifact | {
     privateFunctionRoot: Fr;
     unconstrainedFunctionRoot: Fr;
     metadataHash: Fr;
-}): Fr;
-export declare function computeArtifactHashPreimage(artifact: ContractArtifact): {
+}): Promise<Fr>;
+export declare function computeArtifactHashPreimage(artifact: ContractArtifact): Promise<{
     privateFunctionRoot: Fr;
     unconstrainedFunctionRoot: Fr;
     metadataHash: Fr;
-};
+}>;
 export declare function computeArtifactMetadataHash(artifact: ContractArtifact): Fr;
-export declare function computeArtifactFunctionTreeRoot(artifact: ContractArtifact, fnType: FunctionType): Fr;
-export declare function computeArtifactFunctionTree(artifact: ContractArtifact, fnType: FunctionType): MerkleTree | undefined;
+export declare function computeArtifactFunctionTreeRoot(artifact: ContractArtifact, fnType: FunctionType): Promise<Fr>;
+export declare function computeArtifactFunctionTree(artifact: ContractArtifact, fnType: FunctionType): Promise<MerkleTree | undefined>;
 export declare function computeFunctionArtifactHash(fn: FunctionArtifact | (Pick<FunctionArtifact, 'bytecode'> & {
     functionMetadataHash: Fr;
     selector: FunctionSelector;
 })): Fr;
 export declare function computeFunctionMetadataHash(fn: FunctionArtifact): Fr;
-export declare function getArtifactMerkleTreeHasher(): (l: Buffer, r: Buffer) => Buffer;
+export declare function getArtifactMerkleTreeHasher(): (l: Buffer, r: Buffer) => Promise<Buffer>;
 //# sourceMappingURL=artifact_hash.d.ts.map

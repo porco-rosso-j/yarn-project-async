@@ -78,7 +78,7 @@ export class BatchCall extends BaseContractInteraction {
 
     const [unconstrainedResults, simulatedTx] = await Promise.all([
       Promise.all(unconstrainedCalls),
-      this.wallet.simulateTx(txRequest, true, options?.from),
+      await this.wallet.simulateTx(txRequest, true, options?.from),
     ]);
 
     const results: any[] = [];

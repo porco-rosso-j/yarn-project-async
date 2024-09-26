@@ -27,8 +27,15 @@ export class DefaultAccountEntrypoint implements EntrypointInterface {
     const entrypointPackedArgs = await PackedValues.fromValues(encodeArguments(abi, [appPayload, feePayload]));
     const gasSettings = exec.fee?.gasSettings ?? GasSettings.default();
 
-    const appAuthWitness = await this.auth.createAuthWit(await appPayload.hash());
-    const feeAuthWitness = await this.auth.createAuthWit(await feePayload.hash());
+    const appPayloadHash = await appPayload.hash();
+    console.log('appPayloadHash: ', appPayloadHash.toString());
+    const appAuthWitness = await this.auth.createAuthWit(appPayloadHash);
+    console.log('appAuthWitness: ', appAuthWitness.witness);
+
+    const feePayloadHash = await feePayload.hash();
+    console.log('feePayloadHash: ', feePayloadHash.toString());
+    const feeAuthWitness = await this.auth.createAuthWit(feePayloadHash);
+    console.log('feeAuthWitness: ', feeAuthWitness.witness);
 
     const txRequest = TxExecutionRequest.from({
       firstCallArgsHash: entrypointPackedArgs.hash,

@@ -126,12 +126,14 @@ export async function computeVarArgsHash(args: Fr[]) {
     throw new Error(`Hashing ${args.length} args exceeds max of ${MAX_ARGS_LENGTH}`);
   }
 
-  let chunksHashes = await Promise.all(chunk(args, ARGS_HASH_CHUNK_LENGTH).map(async c => { 
-    if (c.length < ARGS_HASH_CHUNK_LENGTH) {
-      c = padArrayEnd(c, Fr.ZERO, ARGS_HASH_CHUNK_LENGTH);
-    }
-    return await pedersenHash(c, GeneratorIndex.FUNCTION_ARGS);
-  }));
+  let chunksHashes = await Promise.all(
+    chunk(args, ARGS_HASH_CHUNK_LENGTH).map(async c => {
+      if (c.length < ARGS_HASH_CHUNK_LENGTH) {
+        c = padArrayEnd(c, Fr.ZERO, ARGS_HASH_CHUNK_LENGTH);
+      }
+      return await pedersenHash(c, GeneratorIndex.FUNCTION_ARGS);
+    }),
+  );
 
   if (chunksHashes.length < ARGS_HASH_CHUNK_COUNT) {
     chunksHashes = padArrayEnd(chunksHashes, Fr.ZERO, ARGS_HASH_CHUNK_COUNT);
@@ -156,6 +158,9 @@ export async function computeL1ToL2MessageNullifier(
   secret: Fr,
   messageIndex: bigint,
 ) {
-  const innerMessageNullifier = await pedersenHash([messageHash, secret, messageIndex], GeneratorIndex.MESSAGE_NULLIFIER);
-  return siloNullifier(contract, innerMessageNullifier);
+  const innerMessageNullifier = await pedersenHash(
+    [messageHash, secret, messageIndex],
+    GeneratorIndex.MESSAGE_NULLIFIER,
+  );
+  return await siloNullifier(contract, innerMessageNullifier);
 }

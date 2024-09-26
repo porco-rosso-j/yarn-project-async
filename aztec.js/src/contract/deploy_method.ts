@@ -77,6 +77,8 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
     if (!this.txRequest) {
       this.txRequest = await this.wallet.createTxExecutionRequest(await this.request(options));
     }
+
+    console.log('[create DeployMethod] txRequest.origin: ', this.txRequest.origin.toString());
     return this.txRequest;
   }
 
@@ -92,6 +94,7 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
    * it returns a promise for an array instead of a function call directly.
    */
   public async request(options: DeployOptions = {}): Promise<ExecutionRequestInit> {
+    console.log('request called');
     if (!this.functionCalls) {
       // TODO: Should we add the contracts to the DB here, or once the tx has been sent or mined?
       // Note that we need to run this registerContract here so it's available when computeFeeOptionsFromEstimatedGas
@@ -99,7 +102,17 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
       // in case the initializer is public. This hints at the need of having "transient" contracts scoped to a
       // simulation, so we can run the simulation with a set of contracts, but only "commit" them to the wallet
       // once this tx has gone through.
-      await this.wallet.registerContract({ artifact: this.artifact, instance: await this.getInstance(options) });
+      console.log('registering contract');
+      const instance = await this.getInstance(options);
+      console.log('[request] instance address: ', instance.address.toString());
+      // console.log('[request] instance contractClassId: ', instance.contractClassId.toString());
+      // console.log('[request] instance deployer: ', instance.deployer.toString());
+      // console.log('[request] instance publicKeysHash: ', instance.publicKeysHash.toString());
+      // console.log('[request] instance initializationHash: ', instance.initializationHash.toString());
+      // console.log('[request] instance salt: ', instance.salt.toString());
+      // console.log('[request] instance version: ', instance.version.toString());
+      // console.log('[request] artifact: ', this.artifact.name);
+      await this.wallet.registerContract({ artifact: this.artifact, instance: instance });
 
       const deployment = await this.getDeploymentFunctionCalls(options);
       const bootstrap = await this.getInitializeFunctionCalls(options);
@@ -115,6 +128,7 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
         fee: options.fee,
       };
 
+      console.log('[request] options.estimateGas: ', options.estimateGas);
       if (options.estimateGas) {
         // Why do we call this seemingly idempotent getter method here, without using its return value?
         // This call pushes a capsule required for contract class registration under the hood. And since
@@ -127,6 +141,8 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
 
       this.functionCalls = request;
     }
+
+    // console.log('this.functionCalls name in request: ', this.functionCalls.calls[0].name);
 
     return this.functionCalls;
   }
@@ -141,10 +157,23 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
 
     // Set contract instance object so it's available for populating the DeploySendTx object
     const instance = await this.getInstance(options);
+    console.log('[getDeploymentFunctionCalls] instance address: ', instance.address.toString());
 
     // Obtain contract class from artifact and check it matches the reported one by the instance.
     // TODO(@spalladino): We're unnecessarily calculating the contract class multiple times here.
     const contractClass = await getContractClassFromArtifact(this.artifact);
+    // console.log('[getDeploymentFunctionCalls] contractClass.artifactHash: ', contractClass.artifactHash.toString());
+    // console.log('[getDeploymentFunctionCalls] contractClass.id: ', contractClass.id.toString());
+    // console.log(
+    //   '[getDeploymentFunctionCalls] contractClass.publicBytecodeCommitment: ',
+    //   contractClass.publicBytecodeCommitment.toString(),
+    // );
+    // console.log(
+    //   '[getDeploymentFunctionCalls] contractClass.privateFunctionsRoot: ',
+    //   contractClass.privateFunctionsRoot.toString(),
+    // );
+    // console.log('[getDeploymentFunctionCalls] contractClass.packedBytecode: ', contractClass.packedBytecode.toString());
+
     if (!instance.contractClassId.equals(contractClass.id)) {
       throw new Error(
         `Contract class mismatch when deploying contract: got ${instance.contractClassId.toString()} from instance and ${contractClass.id.toString()} from artifact`,
@@ -152,6 +181,7 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
     }
 
     // Register the contract class if it hasn't been published already.
+    console.log('[getDeploymentFunctionCalls] options.skipClassRegistration: ', options.skipClassRegistration);
     if (!options.skipClassRegistration) {
       if (await this.wallet.isContractClassPubliclyRegistered(contractClass.id)) {
         this.log.debug(
@@ -166,9 +196,12 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
     }
 
     // Deploy the contract via the instance deployer.
+    console.log('[getDeploymentFunctionCalls] options.skipPublicDeployment: ', options.skipPublicDeployment);
     if (!options.skipPublicDeployment) {
-      calls.push(deployInstance(this.wallet, instance).request());
+      calls.push((await deployInstance(this.wallet, instance)).request());
     }
+
+    // console.log('[getDeploymentFunctionCalls] calls: ', calls[0].name);
 
     return {
       calls,
@@ -182,6 +215,7 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
    */
   protected async getInitializeFunctionCalls(options: DeployOptions): Promise<ExecutionRequestInit> {
     const { address } = await this.getInstance(options);
+    console.log('[getInitializeFunctionCalls] address: ', address.toString());
     const calls: FunctionCall[] = [];
     if (this.constructorArtifact && !options.skipInitialization) {
       const constructorCall = new ContractFunctionInteraction(
@@ -207,7 +241,20 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
    */
   public override async send(options: DeployOptions = {}): Promise<DeploySentTx<TContract>> {
     const txHashPromise = (await super.send(options)).getTxHash();
+    // if (this.instance) {
+    //   console.log('[send] this.instance address: ', this.instance.address.toString());
+    // }
+    // const instance = this.instance ? this.instance : await this.getInstance(options);
     const instance = await this.getInstance(options);
+    console.log('[send] instance address: ', instance.address.toString());
+    // console.log('[send] instance contractClassId: ', instance.contractClassId.toString());
+    // console.log('[send] instance deployer: ', instance.deployer.toString());
+    // console.log('[send] instance publicKeysHash: ', instance.publicKeysHash.toString());
+    // console.log('[send] instance initializationHash: ', instance.initializationHash.toString());
+    // console.log('[send] instance salt: ', instance.salt.toString());
+    // console.log('[send] instance version: ', instance.version.toString());
+    // console.log('[send] artifact: ', this.artifact.name);
+
     this.log.debug(
       `Sent deployment tx of ${this.artifact.name} contract with deployment address ${instance.address.toString()}`,
     );
@@ -238,16 +285,16 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
    * @param options - Deployment options.
    * @returns The proven tx.
    */
-  public override prove(options: DeployOptions): Promise<Tx> {
-    return super.prove(options);
+  public override async prove(options: DeployOptions): Promise<Tx> {
+    return await super.prove(options);
   }
 
   /**
    * Estimates gas cost for this deployment operation.
    * @param options - Options.
    */
-  public override estimateGas(options?: Omit<DeployOptions, 'estimateGas' | 'skipPublicSimulation'>) {
-    return super.estimateGas(options);
+  public override async estimateGas(options?: Omit<DeployOptions, 'estimateGas' | 'skipPublicSimulation'>) {
+    return await super.estimateGas(options);
   }
 
   /** Return this deployment address. */
@@ -257,6 +304,14 @@ export class DeployMethod<TContract extends ContractBase = Contract> extends Bas
 
   /** Returns the partial address for this deployment. */
   public get partialAddress() {
+    console.log('get partialAddress called in DeployMethod: ', this.instance?.address.toString());
+    this.log.debug('get partialAddress called in DeployMethod');
     return this.instance && computePartialAddress(this.instance);
   }
+  // public async getPartialAddress(): Promise<ReturnType<typeof computePartialAddress> | undefined> {
+  //   if (this.instance) {
+  //     return await computePartialAddress(this.instance);
+  //   }
+  //   return undefined;
+  // }
 }

@@ -52,7 +52,7 @@ export async function broadcastPrivateFunction(
 
   await wallet.addCapsule(bytecode);
 
-  const registerer = getRegistererContract(wallet);
+  const registerer = await getRegistererContract(wallet);
   return Promise.resolve(
     registerer.methods.broadcast_private_function(
       contractClass.id,
@@ -97,13 +97,13 @@ export async function broadcastUnconstrainedFunction(
     artifactTreeSiblingPath,
     functionMetadataHash,
     privateFunctionsArtifactTreeRoot,
-  } = createUnconstrainedFunctionMembershipProof(selector, artifact);
+  } = await createUnconstrainedFunctionMembershipProof(selector, artifact);
 
   const bytecode = bufferAsFields(functionArtifact.bytecode, MAX_PACKED_BYTECODE_SIZE_PER_PRIVATE_FUNCTION_IN_FIELDS);
 
   await wallet.addCapsule(bytecode);
 
-  const registerer = getRegistererContract(wallet);
+  const registerer = await getRegistererContract(wallet);
   return registerer.methods.broadcast_unconstrained_function(
     contractClass.id,
     artifactMetadataHash,

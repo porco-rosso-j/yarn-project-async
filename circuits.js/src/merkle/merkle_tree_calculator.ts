@@ -1,29 +1,33 @@
 // import { pedersenHash } from '@aztec/foundation/crypto';
+import { pedersenHash } from '@aztec/foundation/crypto';
+
 import { MerkleTree } from './merkle_tree.js';
 
 /**
  * Merkle tree calculator.
  */
 export class MerkleTreeCalculator {
-  private zeroHashes: Buffer[];
-  private hasher: (left: Buffer, right: Buffer) => Buffer;
+  private zeroHashes: Buffer[] = [];
+  private hasher!: (left: Buffer, right: Buffer) => Promise<Buffer>;
 
-  // TODO_ASYNC: can't use await in constructor. should be initialized outside.
-  constructor(
-    private height: number,
+  constructor(private height: number) {}
+
+  async setHasher(
     zeroLeaf = Buffer.alloc(32),
-    // hasher = (left: Buffer, right: Buffer) => pedersenHash([left, right]).toBuffer(),
-    hasher = (left: Buffer, right: Buffer) => Buffer.alloc(32),
+    hasher: (left: Buffer, right: Buffer) => Promise<Buffer> = async (left, right) => {
+      return (await pedersenHash([left, right])).toBuffer();
+    },
   ) {
     this.hasher = hasher;
-    this.zeroHashes = Array.from([0], () => zeroLeaf);
-    // this.zeroHashes = Array.from({ length: height }).reduce(
-    //   (acc: Buffer[], _, i) => [...acc, this.hasher(acc[i], acc[i])],
-    //   [zeroLeaf],
-    // );
+    this.zeroHashes = [zeroLeaf];
+    for (let i = 0; i < this.height; i++) {
+      const prevHash = this.zeroHashes[i];
+      const newHash = await this.hasher(prevHash, prevHash);
+      this.zeroHashes.push(newHash);
+    }
   }
 
-  computeTree(leaves: Buffer[] = []): MerkleTree {
+  async computeTree(leaves: Buffer[] = []): Promise<MerkleTree> {
     if (leaves.length === 0) {
       // TODO(#4425): We should be returning a number of nodes that matches the tree height.
       return new MerkleTree(this.height, [this.zeroHashes[this.zeroHashes.length - 1]]);
@@ -37,7 +41,10 @@ export class MerkleTreeCalculator {
       for (let j = 0; j < leaves.length / 2; ++j) {
         const l = leaves[j * 2];
         const r = leaves[j * 2 + 1] || this.zeroHashes[i];
-        newLeaves[j] = this.hasher(l, r);
+        if (!this.hasher) {
+          throw new Error('MerkleTreeCalculator: setHasher() must be called before computing a tree.');
+        }
+        newLeaves[j] = await this.hasher(l, r);
       }
       result = result.concat(new Array(numLeaves - leaves.length).fill(this.zeroHashes[i]), newLeaves);
       leaves = newLeaves;
@@ -46,7 +53,7 @@ export class MerkleTreeCalculator {
     return new MerkleTree(this.height, result);
   }
 
-  computeTreeRoot(leaves: Buffer[] = []): Buffer {
+  async computeTreeRoot(leaves: Buffer[] = []): Promise<Buffer> {
     if (leaves.length === 0) {
       return this.zeroHashes[this.zeroHashes.length - 1];
     }
@@ -58,7 +65,10 @@ export class MerkleTreeCalculator {
       for (; j < leaves.length / 2; ++j) {
         const l = leaves[j * 2];
         const r = leaves[j * 2 + 1] || this.zeroHashes[i];
-        leaves[j] = this.hasher(l, r);
+        if (!this.hasher) {
+          throw new Error('MerkleTreeCalculator: setHasher() must be called before computing a tree.');
+        }
+        leaves[j] = await this.hasher(l, r);
       }
       leaves = leaves.slice(0, j);
     }

@@ -1,0 +1,9 @@
+import { getCanonicalProtocolContract } from '../protocol_contract.js';
+import { MultiCallEntrypointArtifact } from './artifact.js';
+export async function getCanonicalMultiCallEntrypointContract() {
+    return await getCanonicalProtocolContract(MultiCallEntrypointArtifact, 1, []);
+}
+export async function getCanonicalMultiCallEntrypointAddress() {
+    return (await getCanonicalMultiCallEntrypointContract()).address;
+}
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvbXVsdGktY2FsbC1lbnRyeXBvaW50L2luZGV4LnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUVBLE9BQU8sRUFBeUIsNEJBQTRCLEVBQUUsTUFBTSx5QkFBeUIsQ0FBQztBQUM5RixPQUFPLEVBQUUsMkJBQTJCLEVBQUUsTUFBTSxlQUFlLENBQUM7QUFFNUQsTUFBTSxDQUFDLEtBQUssVUFBVSx1Q0FBdUM7SUFDM0QsT0FBTyxNQUFNLDRCQUE0QixDQUFDLDJCQUEyQixFQUFFLENBQUMsRUFBRSxFQUFFLENBQUMsQ0FBQztBQUNoRixDQUFDO0FBRUQsTUFBTSxDQUFDLEtBQUssVUFBVSxzQ0FBc0M7SUFDMUQsT0FBTyxDQUFDLE1BQU0sdUNBQXVDLEVBQUUsQ0FBQyxDQUFDLE9BQU8sQ0FBQztBQUNuRSxDQUFDIn0=

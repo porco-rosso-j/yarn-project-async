@@ -87,7 +87,7 @@
     ]
   },
   "dependencies": {
-    "@aztec/bb.js": "0.46.1",
+    "@aztec/bb.js": "file:../../react-native-bb.js",
     "@koa/cors": "^5.0.0",
     "@noble/curves": "^1.2.0",
     "bn.js": "^5.2.1",

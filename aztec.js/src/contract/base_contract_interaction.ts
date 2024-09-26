@@ -45,6 +45,7 @@ export abstract class BaseContractInteraction {
    * @returns The resulting transaction
    */
   public async prove(options: SendMethodOptions = {}): Promise<Tx> {
+    console.log('[prove in BaseContractInteraction]');
     const txRequest = this.txRequest ?? (await this.create(options));
     this.tx = await this.wallet.proveTx(txRequest, !options.skipPublicSimulation);
     return this.tx;
@@ -59,10 +60,11 @@ export abstract class BaseContractInteraction {
    * the AztecAddress of the sender. If not provided, the default address is used.
    * @returns A SentTx instance for tracking the transaction status and information.
    */
-  public async send(options: SendMethodOptions = {}) {
+  public async send(options: SendMethodOptions = {}): Promise<SentTx> {
+    console.log('[send in BaseContractInteraction]');
     const promise = (async () => {
       const tx = this.tx ?? (await this.prove(options));
-      return this.wallet.sendTx(tx);
+      return await this.wallet.sendTx(tx);
     })();
 
     return new SentTx(this.wallet, promise);
@@ -76,6 +78,8 @@ export abstract class BaseContractInteraction {
   public async estimateGas(
     opts?: Omit<SendMethodOptions, 'estimateGas' | 'skipPublicSimulation'>,
   ): Promise<Pick<GasSettings, 'gasLimits' | 'teardownGasLimits'>> {
+    console.log('[estimateGas in BaseContractInteraction]');
+
     // REFACTOR: both `this.txRequest = undefined` below are horrible, we should not be caching stuff that doesn't need to be.
     // This also hints at a weird interface for create/request/estimate/send etc.
 
@@ -99,6 +103,8 @@ export abstract class BaseContractInteraction {
    * @returns Fee options for the actual transaction.
    */
   protected async getFeeOptionsFromEstimatedGas(request: ExecutionRequestInit) {
+    console.log('[getFeeOptionsFromEstimatedGas in BaseContractInteraction]');
+
     const fee = request.fee;
     if (fee) {
       const txRequest = await this.wallet.createTxExecutionRequest(request);
